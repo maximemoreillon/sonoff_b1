@@ -26,6 +26,8 @@ void MQTT_connect_callback(bool sessionPresent) {
 
   // Subscribing to command topics
   MQTT_client.subscribe(MQTT_COMMAND_TOPIC, MQTT_QOS);
+  MQTT_client.subscribe(MQTT_BRIGHTNESS_COMMAND_TOPIC, MQTT_QOS);
+  MQTT_client.subscribe(MQTT_RGB_COMMAND_TOPIC, MQTT_QOS);
 
   // Update status
   MQTT_client.publish(MQTT_STATUS_TOPIC, MQTT_QOS, MQTT_RETAIN, light_state);
@@ -67,33 +69,70 @@ void MQTT_message_callback(char* topic, char* payload, AsyncMqttClientMessagePro
   Serial.print("  total: ");
   Serial.println(total);
 
-  if(strncmp(payload, "ON", len) == 0){
-    Serial.println("Light ON");
-    sl_my92x1_duty(255,255,255,255,255);
-    light_state = "ON";
-  }
-  else if(strncmp(payload, "OFF", len) == 0){
-    Serial.println("Light OFF");
-    sl_my92x1_duty(0,0,0,0,0);
-    light_state = "OFF";
-  }
-  else if(strncmp(payload, "TOGGLE", len) == 0){
-    Serial.println("Toggling light state");
-    
-    if(strcmp(light_state,"OFF") == 0){
+  if(strcmp(topic,MQTT_COMMAND_TOPIC) == 0){
+    Serial.println("Topic is MAIN");
+    if(strncmp(payload, "ON", len) == 0){
       Serial.println("Light ON");
-      sl_my92x1_duty(255,255,255,255,255);
+      sl_my92x1_duty(light_r_int,light_g_int,light_b_int,light_brightness_int,light_brightness_int);
       light_state = "ON";
     }
-    else {
+    else if(strncmp(payload, "OFF", len) == 0){
       Serial.println("Light OFF");
       sl_my92x1_duty(0,0,0,0,0);
       light_state = "OFF";
     }
+    else if(strncmp(payload, "TOGGLE", len) == 0){
+      Serial.println("Toggling light state");
+      
+      if(strcmp(light_state,"OFF") == 0){
+        Serial.println("Light ON");
+        sl_my92x1_duty(light_r_int,light_g_int,light_b_int,light_brightness_int,light_brightness_int);
+        light_state = "ON";
+      }
+      else {
+        Serial.println("Light OFF");
+        sl_my92x1_duty(0,0,0,0,0);
+        light_state = "OFF";
+      }
+    }
+  
+    Serial.println("MQTT publish of light state");
+    MQTT_client.publish(MQTT_STATUS_TOPIC, MQTT_QOS, MQTT_RETAIN, light_state);
+  }
+  
+  else if(strcmp(topic,MQTT_BRIGHTNESS_COMMAND_TOPIC) == 0){
+    Serial.println("Topic is BRIGHNTESS");
+    light_brightness = payload;
+    light_brightness_int = atoi(light_brightness);
+    sl_my92x1_duty(light_r_int,light_g_int,light_b_int,light_brightness_int,light_brightness_int);
+
+    Serial.println("MQTT publish of light brightness");
+    MQTT_client.publish(MQTT_BRIGHTNESS_STATUS_TOPIC, MQTT_QOS, MQTT_RETAIN, light_brightness);
+  }
+  
+  else if(strcmp(topic,MQTT_RGB_COMMAND_TOPIC) == 0){
+    Serial.println("Topic is RGB");
+    light_rgb = payload;
+    char* sub_payload = strtok(light_rgb,",");
+    if(sub_payload){
+      light_r_int = atoi(sub_payload);
+    }
+    sub_payload = strtok(NULL,",");
+    if(sub_payload){
+      light_g_int = atoi(sub_payload);
+    }
+    sub_payload = strtok(NULL,",");
+    if(sub_payload){
+      light_b_int = atoi(sub_payload);
+    }
+    
+    sl_my92x1_duty(light_r_int,light_g_int,light_b_int,light_brightness_int,light_brightness_int);
+
+    Serial.println("MQTT publish of light RGB");
+    MQTT_client.publish(MQTT_RGB_STATUS_TOPIC, MQTT_QOS, MQTT_RETAIN, light_rgb);
   }
 
-  Serial.println("MQTT publish of relay state");
-  MQTT_client.publish(MQTT_STATUS_TOPIC, MQTT_QOS, MQTT_RETAIN, light_state);
+  
 }
 
 void MQTT_publish_callback(uint16_t packetId) {

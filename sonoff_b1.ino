@@ -37,6 +37,14 @@ Ticker MQTT_reconnect_timer;
 // Other variables
 char* light_state = "ON";
 
+char* light_brightness = "255";
+int light_brightness_int = 255;
+
+char* light_rgb;
+int light_r_int = 255;
+int light_g_int = 255;
+int light_b_int = 255;
+
 void setup()
 {
   // Mandatory initial delay
@@ -50,7 +58,7 @@ void setup()
   pinMode(DI_pin, OUTPUT);
   pinMode(DCK_pin, OUTPUT);
   sl_my92x1_init();
-  sl_my92x1_duty(255,255,255,255,255);
+  sl_my92x1_duty(light_r_int,light_g_int,light_b_int,light_brightness_int,light_brightness_int);
   
   wifi_setup();
   MQTT_setup();

@@ -12,6 +12,7 @@
 #include <WiFiUdp.h> // Required for OTA
 #include <AsyncMqttClient.h> // MQTT library
 #include <Ticker.h> // Used when reconecting MQTT upon wifi drop
+#include <ArduinoJson.h>
 
 #include "credentials.h";
 #include "kitchen_light_config.h";
@@ -36,14 +37,10 @@ Ticker MQTT_reconnect_timer;
 
 // Other variables
 char* light_state = "ON";
-
-char* light_brightness = "255";
-int light_brightness_int = 255;
-
-char* light_rgb;
-int light_r_int = 255;
-int light_g_int = 255;
-int light_b_int = 255;
+int light_brightness = 255;
+int light_r = 255;
+int light_g = 255;
+int light_b = 255;
 
 void setup()
 {
@@ -58,7 +55,7 @@ void setup()
   pinMode(DI_pin, OUTPUT);
   pinMode(DCK_pin, OUTPUT);
   sl_my92x1_init();
-  sl_my92x1_duty(light_r_int,light_g_int,light_b_int,light_brightness_int,light_brightness_int);
+  sl_my92x1_duty(light_r,light_g,light_b,light_brightness,light_brightness);
   
   wifi_setup();
   MQTT_setup();

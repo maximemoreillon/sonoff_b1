@@ -26,11 +26,9 @@ void MQTT_connect_callback(bool sessionPresent) {
 
   // Subscribing to command topics
   MQTT_client.subscribe(MQTT_COMMAND_TOPIC, MQTT_QOS);
-  MQTT_client.subscribe(MQTT_BRIGHTNESS_COMMAND_TOPIC, MQTT_QOS);
-  MQTT_client.subscribe(MQTT_RGB_COMMAND_TOPIC, MQTT_QOS);
 
   // Update status
-  MQTT_client.publish(MQTT_STATUS_TOPIC, MQTT_QOS, MQTT_RETAIN, light_state);
+  MQTT_publish_light_state();
 }
 
 void MQTT_disconnect_callback(AsyncMqttClientDisconnectReason reason) {
@@ -69,72 +67,54 @@ void MQTT_message_callback(char* topic, char* payload, AsyncMqttClientMessagePro
   Serial.print("  total: ");
   Serial.println(total);
 
-  if(strcmp(topic,MQTT_COMMAND_TOPIC) == 0){
-    Serial.println("Topic is MAIN");
-    if(strncmp(payload, "ON", len) == 0){
-      Serial.println("Light ON");
-      sl_my92x1_duty(light_r_int,light_g_int,light_b_int,light_brightness_int,light_brightness_int);
-      light_state = "ON";
-    }
-    else if(strncmp(payload, "OFF", len) == 0){
-      Serial.println("Light OFF");
-      sl_my92x1_duty(0,0,0,0,0);
-      light_state = "OFF";
-    }
-    else if(strncmp(payload, "TOGGLE", len) == 0){
-      Serial.println("Toggling light state");
-      
-      if(strcmp(light_state,"OFF") == 0){
-        Serial.println("Light ON");
-        sl_my92x1_duty(light_r_int,light_g_int,light_b_int,light_brightness_int,light_brightness_int);
-        light_state = "ON";
-      }
-      else {
-        Serial.println("Light OFF");
-        sl_my92x1_duty(0,0,0,0,0);
-        light_state = "OFF";
-      }
-    }
-  
-    Serial.println("MQTT publish of light state");
-    MQTT_client.publish(MQTT_STATUS_TOPIC, MQTT_QOS, MQTT_RETAIN, light_state);
-  }
-  
-  else if(strcmp(topic,MQTT_BRIGHTNESS_COMMAND_TOPIC) == 0){
-    Serial.println("Topic is BRIGHNTESS");
-    light_brightness = payload;
-    light_brightness_int = atoi(light_brightness);
-    sl_my92x1_duty(light_r_int,light_g_int,light_b_int,light_brightness_int,light_brightness_int);
+  StaticJsonBuffer<200> jsonBuffer;
 
-    Serial.println("MQTT publish of light brightness");
-    MQTT_client.publish(MQTT_BRIGHTNESS_STATUS_TOPIC, MQTT_QOS, MQTT_RETAIN, light_brightness);
-  }
-  
-  else if(strcmp(topic,MQTT_RGB_COMMAND_TOPIC) == 0){
-    Serial.println("Topic is RGB");
-    light_rgb = payload;
-    char* sub_payload = strtok(light_rgb,",");
-    if(sub_payload){
-      light_r_int = atoi(sub_payload);
-    }
-    sub_payload = strtok(NULL,",");
-    if(sub_payload){
-      light_g_int = atoi(sub_payload);
-    }
-    sub_payload = strtok(NULL,",");
-    if(sub_payload){
-      light_b_int = atoi(sub_payload);
-    }
-    
-    sl_my92x1_duty(light_r_int,light_g_int,light_b_int,light_brightness_int,light_brightness_int);
+  JsonObject& root = jsonBuffer.parseObject(payload);
 
-    Serial.println("MQTT publish of light RGB");
-    MQTT_client.publish(MQTT_RGB_STATUS_TOPIC, MQTT_QOS, MQTT_RETAIN, light_rgb);
+  if (root.containsKey("state")) {
+    const char* light_state_temp = root["state"];
+    light_state = (char*) light_state_temp;
+  }
+  if (root.containsKey("brightness")) {
+    light_brightness = root["brightness"];
+  }
+  if (root.containsKey("color")) {
+    light_r = root["color"]["r"];
+    light_g = root["color"]["g"];
+    light_b = root["color"]["b"];
   }
 
-  
+  if(strcmp(light_state,"ON") == 0){
+    sl_my92x1_duty(light_r,light_g,light_b,light_brightness,light_brightness);
+  }
+  else {
+    sl_my92x1_duty(0,0,0,0,0);
+  }
+
+  MQTT_publish_light_state();
 }
 
 void MQTT_publish_callback(uint16_t packetId) {
   Serial.println("MQTT published successfully");
 }
+
+void MQTT_publish_light_state(){
+  StaticJsonBuffer<200> jsonBuffer;
+  
+  JsonObject& root = jsonBuffer.createObject();
+  root["state"] = light_state;
+  root["brightness"] = light_brightness;
+  
+  JsonObject& color = root.createNestedObject("color");
+  color["r"] = light_r;
+  color["g"] = light_g;
+  color["b"] = light_b;
+
+  root.prettyPrintTo(Serial);
+  Serial.println("");
+  
+  char payload[200];
+  root.printTo(payload, root.measureLength() + 1);
+  MQTT_client.publish(MQTT_STATUS_TOPIC, MQTT_QOS, MQTT_RETAIN, payload);
+}
+

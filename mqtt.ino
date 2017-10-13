@@ -1,3 +1,9 @@
+/*
+ * Original code from MarvinRoger's Async MQTT client library
+ * https://github.com/marvinroger/async-mqtt-client
+ */
+
+
 void MQTT_setup(){
 
   // Callbacks
@@ -72,8 +78,7 @@ void MQTT_message_callback(char* topic, char* payload, AsyncMqttClientMessagePro
   JsonObject& root = jsonBuffer.parseObject(payload);
 
   if (root.containsKey("state")) {
-    const char* light_state_temp = root["state"];
-    light_state = (char*) light_state_temp;
+    light_state = (char*) root["state"];
   }
   if (root.containsKey("brightness")) {
     light_brightness = root["brightness"];
@@ -85,10 +90,10 @@ void MQTT_message_callback(char* topic, char* payload, AsyncMqttClientMessagePro
   }
 
   if(strcmp(light_state,"ON") == 0){
-    sl_my92x1_duty(light_r,light_g,light_b,light_brightness,light_brightness);
+    LED_set(light_r,light_g,light_b,light_brightness,light_brightness);
   }
   else {
-    sl_my92x1_duty(0,0,0,0,0);
+    LED_set(0,0,0,0,0);
   }
 
   MQTT_publish_light_state();

@@ -1,8 +1,11 @@
 /*
- * CUSTOM SONOFF FIRMWARE
+ * CUSTOM SONOFF B1 FIRMWARE
  * Maxime MOREILLON
  * 
- * Board type: Generic ESP8285
+ * Flash settings:
+ * Board type: Generic ESP8266 (even though the chip is an ESP8285)
+ * Flash mode: DIO (DOUT for newer SONOFF)
+ * Flash size: 1M (64 SPIFFS)
  */
 
 
@@ -52,10 +55,8 @@ void setup()
   Serial.println(); // Separate serial stream from initial gibberish
   Serial.println(F(__FILE__ " " __DATE__ " " __TIME__));
 
-  pinMode(DI_pin, OUTPUT);
-  pinMode(DCK_pin, OUTPUT);
-  sl_my92x1_init();
-  sl_my92x1_duty(light_r,light_g,light_b,light_brightness,light_brightness);
+  LED_setup();
+  LED_set(light_r,light_g,light_b,light_brightness,light_brightness);
   
   wifi_setup();
   MQTT_setup();
@@ -67,5 +68,4 @@ void setup()
 
 void loop() {
   ArduinoOTA.handle();
-  
 }

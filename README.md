@@ -13,10 +13,10 @@ The code to interface with the LED driver has been borrowed from [Tasmota](https
 ## Arduino IDE flashing settings
 
 * Type of board: Generic ESP8266
-* Flash Mode: DOUT
+* Flash Mode: **DOUT**
 * Flash Frequency: 40MHz
 * CPU Frequency: 80MHz
-* Flash Size: 1M (64K SPIFFS)
+* Flash Size: **1M (64K SPIFFS)**
 * Debug Port: Disabled
 * Debug Level: None
 * Reset Method: ck

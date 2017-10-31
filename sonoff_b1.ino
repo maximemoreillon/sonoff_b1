@@ -39,7 +39,7 @@ Ticker MQTT_reconnect_timer;
 #define DCK_pin 14
 
 // Other variables
-char* light_state = "ON";
+char* light_state = INITIAL_STATE;
 int light_brightness = 255;
 int light_r = 255;
 int light_g = 255;

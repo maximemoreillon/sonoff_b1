@@ -4,7 +4,7 @@
  * 
  * Flash settings:
  * Board type: Generic ESP8266 (even though the chip is an ESP8285)
- * Flash mode: DIO (DOUT for newer SONOFF)
+ * Flash mode: DOUT
  * Flash size: 1M (64 SPIFFS)
  */
 
@@ -18,7 +18,7 @@
 #include <ArduinoJson.h>
 
 #include "credentials.h";
-#include "kitchen_light_config.h";
+#include "living_room_standing_light_1_config.h";
 
 // Wifi
 Ticker wifi_reconnect_timer;

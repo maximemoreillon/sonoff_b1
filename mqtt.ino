@@ -78,7 +78,21 @@ void MQTT_message_callback(char* topic, char* payload, AsyncMqttClientMessagePro
   JsonObject& root = jsonBuffer.parseObject(payload);
 
   if (root.containsKey("state")) {
-    light_state = (char*) root["state"];
+    
+    strcpy( light_state, root["state"]);
+    Serial.print("Received light state is: ");
+    Serial.println(light_state);
+
+    // BIG PROBLEM HERE
+    if(strcmp(root["state"],"OFF") == 0){
+      Serial.println("Received light state is OFF, turning light OFF");
+      LED_set(0,0,0,0,0);
+    }
+    else{
+      Serial.println("Received light state is ON, turning light ON");
+      LED_set(light_r,light_g,light_b,light_brightness,light_brightness);
+    }
+    
   }
   if (root.containsKey("brightness")) {
     light_brightness = root["brightness"];
@@ -89,12 +103,7 @@ void MQTT_message_callback(char* topic, char* payload, AsyncMqttClientMessagePro
     light_b = root["color"]["b"];
   }
 
-  if(strcmp(light_state,"ON") == 0){
-    LED_set(light_r,light_g,light_b,light_brightness,light_brightness);
-  }
-  else {
-    LED_set(0,0,0,0,0);
-  }
+  
 
   MQTT_publish_light_state();
 }

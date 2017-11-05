@@ -5,7 +5,7 @@ void OTA_setup(){
   ArduinoOTA.setPassword(OTA_PASSWORD); // No authentication by default
 
   ArduinoOTA.onStart([]() {
-    Serial.println("Start");
+    Serial.println("OTA Start");
   });
 
   ArduinoOTA.onEnd([]() {

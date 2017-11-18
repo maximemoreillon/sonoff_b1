@@ -18,7 +18,7 @@
 #include <ArduinoJson.h>
 
 #include "credentials.h";
-#include "living_room_standing_light_1_config.h";
+#include "living_room_standing_light_2_config.h";
 
 // Wifi
 Ticker wifi_reconnect_timer;

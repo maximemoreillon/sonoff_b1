@@ -3,6 +3,8 @@ Custom firmware for SONOFF B1, enabling MQTT communication
 
 The code to interface with the LED driver has been borrowed from [Tasmota](https://github.com/arendst/Sonoff-Tasmota)
 
+More info: http://maximemoreillon.com/tutorials/iot/sonoff_b1.php
+
 ## Requirements
 * Arduino IDE with [support for ESP8266](https://github.com/esp8266/Arduino)
 * [Async MQTT client](https://github.com/marvinroger/async-mqtt-client)

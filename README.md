@@ -1,4 +1,4 @@
-# sonoff_b1
+# SONOFF B1 firmware
 Custom firmware for SONOFF B1, enabling MQTT communication
 
 The code to interface with the LED driver has been borrowed from [Tasmota](https://github.com/arendst/Sonoff-Tasmota)
@@ -24,4 +24,4 @@ More info: http://maximemoreillon.com/tutorials/iot/sonoff_b1.php
 * Reset Method: ck
 * Upload Speed: 115200
 
-Note: Even though the SONOFF B1 is equipped with an ESP8285, using the ESP8285 of the Arduino IDE will prevent OTA updates from working.
+Note: Even though the SONOFF B1 is equipped with an ESP8285, selecting the ESP8285 in the Arduino IDE will prevent OTA updates from working.
